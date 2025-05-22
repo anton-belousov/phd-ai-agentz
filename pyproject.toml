@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "phd-ai-agentz"
+version = "0.1.0"
+description = "Cyber security agent examples for PHD"
+authors = ["Антон Белоусов <anton@cyberintel.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.32.3"
+python-dotenv = "^1.1.0"
+langgraph = "^0.4.5"
+shodan = "^1.31.0"
+typer = "^0.15.4"
+rich = "^14.0.0"
+langgraph-swarm = "^0.0.11"
+langchain = "^0.3.25"
+langchain-openai = "^0.3.17"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+black = "^24.1.1"
+isort = "^5.13.2"
+mypy = "^1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 
