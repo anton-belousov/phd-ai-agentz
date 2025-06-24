@@ -1,12 +1,10 @@
-from typing import Annotated, Literal, TypedDict
+from typing import Literal
 
-from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, AnyMessage, ToolMessage
 from langchain_core.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
-from langgraph.graph.message import add_messages
 from langgraph.pregel import RetryPolicy
-from pydantic import BaseModel, Field
 from rich.console import Console
 
 from common.config import (
@@ -14,31 +12,13 @@ from common.config import (
     OPENAI_API_MODEL,
     OPENAI_API_URL,
 )
-from common.tools import nmap_scan, ping, shodan_lookup, traceroute
+from common.prompts import get_prompt_template
+from common.tools import nmap_scan, nslookup, ping, shodan_lookup, traceroute
+
+from .models import AgentInputState, AgentOutputState, AgentState, AnalysisResult
+from .prompts import ANALYSIS_PROMPT, FIRST_PROMPT, SUBSEQUENT_PROMPT, SYSTEM_PROMPT
 
 MAX_ATTEMPTS = 3
-
-
-class AgentInputState(TypedDict):
-    ip_address: str
-
-
-class AgentOutputState(TypedDict):
-    has_security_issues: bool
-    identified_issues: list[str]
-
-
-class AgentState(AgentInputState, AgentOutputState):
-    messages: Annotated[list[HumanMessage | AIMessage], add_messages]
-
-
-class AnalysisResult(BaseModel):
-    has_security_issues: bool = Field(
-        description="Whether the IP address has security issues"
-    )
-    identified_issues: list[str] = Field(
-        description="A list of identified security issues"
-    )
 
 
 console = Console()
@@ -47,6 +27,7 @@ all_tools = {
     "traceroute": traceroute,
     "nmap_scan": nmap_scan,
     "shodan_lookup": shodan_lookup,
+    "nslookup": nslookup,
 }
 
 
@@ -59,24 +40,18 @@ def create_security_agent():
         """Run security tools on the IP address."""
         console.print("[bold blue]Running security tools...[/bold blue]")
         console.print(f"state.messages: {len(state['messages'])}")
-        ip_address = state["ip_address"]
+        host = state["host"]
 
-        messages = state["messages"]
-        new_messages = []
+        messages: list[AnyMessage] = state["messages"]
+        new_messages: list[AnyMessage] = []
 
         if not messages:
-            new_messages = [
-                HumanMessage(
-                    content=f"Analyze this IP address for security problems: {ip_address}\nUse any 1 tool of your choice to help you. First check if the IP address is reachable using ping. Answer 'done' if you are finished."
-                )
-            ]
+            new_messages = get_prompt_template(
+                FIRST_PROMPT, SYSTEM_PROMPT
+            ).format_messages(host=host)
 
         else:
-            new_messages = [
-                HumanMessage(
-                    content="Use any 1 tool of your choice to help you. Answer 'done' if you are finished."
-                )
-            ]
+            new_messages = get_prompt_template(SUBSEQUENT_PROMPT).format_messages()
 
         response: AIMessage = await llm.bind_tools(all_tools.values()).ainvoke(
             messages + new_messages
@@ -126,22 +101,17 @@ def create_security_agent():
         """Analyze the results from all tools and provide insights."""
         console.print("[bold blue]Analyzing results...[/bold blue]")
 
-        messages = state["messages"] + [
-            HumanMessage(
-                content=f"Analyze these security scan results for the IP address {state['ip_address']} and decide whether it has security issues or not."
-            )
-        ]
+        messages = state["messages"] + get_prompt_template(
+            ANALYSIS_PROMPT
+        ).format_messages(host=state["host"])
+
+        console.print(f"messages: {messages}")
 
         response: AnalysisResult = await llm.with_structured_output(
             AnalysisResult
         ).ainvoke(messages)
 
-        return AgentOutputState(
-            has_security_issues=response.has_security_issues,
-            identified_issues=response.identified_issues,
-        )
-
-        return state
+        return AgentOutputState(result=response)
 
     graph = StateGraph(AgentState, input=AgentInputState, output=AgentOutputState)
     graph.add_node(
@@ -166,10 +136,10 @@ def create_security_agent():
     return graph.compile()
 
 
-async def run_security_scan(ip_address: str) -> AgentOutputState:
-    """Run a complete security scan on the given IP address."""
+async def run_security_scan(host: str) -> AgentOutputState:
+    """Run a complete security scan on the given host."""
     agent = create_security_agent()
-    input_state = AgentInputState(ip_address=ip_address)
+    input_state = AgentInputState(host=host)
     output_state: AgentOutputState = await agent.ainvoke(input_state)
 
     return output_state

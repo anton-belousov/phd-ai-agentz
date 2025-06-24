@@ -10,7 +10,7 @@ from common.config import SHODAN_API_KEY
 console = Console()
 
 
-async def run_command(command: str, timeout: int = 30) -> subprocess.Process:
+async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
     """Run a command and return the results."""
     console.print(f"[bold blue]\tRunning {command}...[/bold blue]")
 
@@ -22,13 +22,31 @@ async def run_command(command: str, timeout: int = 30) -> subprocess.Process:
     )
 
 
+@tool(description="Get IP address for the given domain")
+async def nslookup(domain: str) -> str:
+    """Execute nslookup command and return results."""
+    console.print(f"[bold blue]Looking up {domain} with nslookup...[/bold blue]")
+
+    try:
+        result: subprocess.Process = await _run_command(" ".join(["nslookup", domain]))
+
+        stdout, stderr = await result.communicate()
+        if result.returncode != 0:
+            return stderr.decode()
+
+        return stdout.decode()
+
+    except Exception as e:
+        return str(e)
+
+
 @tool(description="Ping a given IP address")
 async def ping(ip_address: str) -> str:
     """Execute ping command and return results."""
     console.print(f"[bold blue]Pinging {ip_address}...[/bold blue]")
 
     try:
-        result: subprocess.Process = await run_command(
+        result: subprocess.Process = await _run_command(
             " ".join(["ping", "-c", "4", ip_address])
         )
 
@@ -49,10 +67,15 @@ async def traceroute(ip_address: str) -> str:
     """Execute traceroute command and return results."""
     console.print(f"[bold blue]Tracerouting {ip_address}...[/bold blue]")
     try:
-        result: subprocess.Process = await run_command(
+        result: subprocess.Process = await _run_command(
             " ".join(["traceroute", ip_address])
         )
-        return result.stdout.decode()
+
+        stdout, stderr = await result.communicate()
+        if result.returncode != 0:
+            return stderr.decode()
+
+        return stdout.decode()
 
     except Exception as e:
         return str(e)
@@ -64,10 +87,15 @@ async def nmap_scan(ip_address: str) -> str:
     console.print(f"[bold blue]Scanning {ip_address} with nmap...[/bold blue]")
 
     try:
-        result: subprocess.Process = await run_command(
+        result: subprocess.Process = await _run_command(
             " ".join(["nmap", "-sV", ip_address])
         )
-        return result.stdout.decode()
+
+        stdout, stderr = await result.communicate()
+        if result.returncode != 0:
+            return stderr.decode()
+
+        return stdout.decode()
 
     except Exception as e:
         return str(e)
