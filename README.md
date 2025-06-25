@@ -2,9 +2,11 @@
 
 Этот проект содержит четыре различные реализации агентов кибербезопасности, использующих разные подходы:
 - langgraph: Простой агент на базе LangGraph
+- langgraph-mcp: Комбинированный подход LangGraph и MCP
 - langgraph-swarm: Рой агентов на базе LangGraph
 - mcp: Реализация Model Context Protocol
-- langgraph-mcp: Комбинированный подход LangGraph и MCP
+
+Все проекты реализуют простой сканер безопасности и сетевой конфигурации удалённого сервера - комбинацию утилит nmap, shodan, ping, nslookup, traceroute.
 
 ## Структура проекта
 
@@ -35,21 +37,46 @@
   - ping
   - traceroute
   - nmap
-  - API ключ Shodan
+  - nslookup
+- API ключ Shodan (напишите мне в @antonbelousoff - могу поделиться своим)
 
 ## Использование
 
-Каждый агент может быть запущен из командной строки с IP-адресом в качестве входного параметра:
+Каждый агент может быть запущен из командной строки с IP-адресом или доменом в качестве входного параметра:
 
 ```bash
-python -m <имя-подпроекта>.main <ip-адрес>
+python -m <имя-подпроекта>.main <хост>
 ```
 
-Например, запуск LangGraph:
+1. запуск агента LangGraph:
 
-```bash
-python -m agent_langgraph.main 1.2.3.4
-```
+   ```bash
+   python -m agent_langgraph.main 1.2.3.4
+   ```
+
+2. запуск агента LangGraph-MCP:
+
+   ```bash
+   python -m agent_langgraph_mcp.main 1.2.3.4
+   ```
+
+3. запуск агента LangGraph-Swarm:
+
+   ```bash
+   python -m agent_langgraph_swarm.main 1.2.3.4
+   ```
+
+4. запуск агента MCP:
+
+   ```bash
+   python -m agent_mcp.main 1.2.3.4
+   ```
+
+## Домашнее задание
+
+Подключите MCP Metasploit к агенту LangGraph-MCP, чтобы бот умел вызывать сканирование с помощью модулей metasploit. Можно воспользоваться готовым [MCP сервером](https://github.com/GH05TCREW/MetasploitMCP) или написать простенький свой.
+
+С вас пулл-реквест, с меня секретный приз первому, оформившему рабочий PR.
 
 ## Лицензия
 
