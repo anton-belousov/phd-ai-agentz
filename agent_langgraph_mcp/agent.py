@@ -5,6 +5,7 @@ Simple security scanner using LangGraph and tools connected via MCP
 # Create server parameters for stdio connection
 from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langgraph.prebuilt import create_react_agent
 from mcp import ClientSession, StdioServerParameters
@@ -28,7 +29,7 @@ async def run_security_scan(host: str) -> AnalysisResult:
         async with ClientSession(read, write) as session:
             await session.initialize()
 
-            tools = await load_mcp_tools(session)
+            tools: list[BaseTool] = await load_mcp_tools(session)
             agent = create_react_agent(
                 OPENAI_API_MODEL, tools, response_format=AnalysisResult
             )
