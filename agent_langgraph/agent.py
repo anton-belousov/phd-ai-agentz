@@ -33,11 +33,11 @@ MAX_ATTEMPTS = 3
 
 console = Console()
 all_tools = {
-    "ping": ping_tool,
-    "traceroute": traceroute_tool,
-    "nmap_scan": nmap_scan_tool,
-    "shodan_lookup": shodan_lookup_tool,
-    "nslookup": nslookup_tool,
+    "ping_tool": ping_tool,
+    "traceroute_tool": traceroute_tool,
+    "nmap_scan_tool": nmap_scan_tool,
+    "shodan_lookup_tool": shodan_lookup_tool,
+    "nslookup_tool": nslookup_tool,
 }
 
 
