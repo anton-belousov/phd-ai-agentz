@@ -3,27 +3,29 @@ Simple security scanner using LangGraph and tools connected via MCP
 """
 
 from langchain_core.tools import BaseTool
-from langchain_mcp_adapters.tools import load_mcp_tools
-from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from langchain_mcp_adapters.client import MultiServerMCPClient
 
 from agent_langgraph.agent import create_security_agent
 from agent_langgraph.models import AgentInputState, AgentOutputState, AnalysisResult
 
 SERVER_URL = "http://localhost:8000/mcp"
 
+CLIENT_PARAMS = {
+    "security": {
+        "url": SERVER_URL,
+        "transport": "streamable_http",
+    }
+}
+
 
 async def run_security_scan(host: str) -> AnalysisResult:
     """Run a complete security scan on the given host."""
 
-    async with streamablehttp_client(SERVER_URL) as (read, write, _):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
+    client = MultiServerMCPClient(CLIENT_PARAMS)
+    tools: list[BaseTool] = await client.get_tools()
+    agent = create_security_agent(tools)
 
-            tools: list[BaseTool] = await load_mcp_tools(session)
-            agent = create_security_agent(tools)
+    input_state = AgentInputState(host=host)
+    output_state: AgentOutputState = await agent.ainvoke(input_state)
 
-            input_state = AgentInputState(host=host)
-            output_state: AgentOutputState = await agent.ainvoke(input_state)
-
-            return output_state["result"]
+    return output_state["result"]
