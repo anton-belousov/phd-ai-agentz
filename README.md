@@ -1,82 +1,55 @@
 # PHD AI Agentz
 
-Этот проект содержит четыре различные реализации агентов кибербезопасности, использующих разные подходы:
-- langgraph: Простой агент на базе LangGraph
-- langgraph-mcp: Комбинированный подход LangGraph и MCP
-- langgraph-swarm: Рой агентов на базе LangGraph
-- mcp: Реализация Model Context Protocol
+Этот проект содержит различные реализации агентов кибербезопасности, использующих разные подходы.
 
-Все проекты реализуют простой сканер безопасности и сетевой конфигурации удалённого сервера - комбинацию утилит nmap, shodan, ping, nslookup, traceroute.
-
-## Структура проекта
-
-```
-├── agent_langgraph/           # Простой агент на базе LangGraph
-├── agent_langgraph_mcp/       # Комбинированный подход LangGraph и MCP
-├── agent_langgraph_swarm/     # Рой агентов на базе LangGraph
-└── agent_mcp/                 # Реализация Model Context Protocol
-```
-
-## Установка
-
-1. Установите зависимости:
-   ```bash
-   poetry install --no-root
-   ```
-
-2. Активируйте виртуальное окружение:
-   ```bash
-   poetry shell
-   ```
-
-## Требования
+## Зависимости
 
 - Python 3.12 или выше
-- Poetry для управления зависимостями
+- uv для управления зависимостями
 - Необходимые системные инструменты:
   - ping
   - traceroute
   - nmap
   - nslookup
-- API ключ Shodan (напишите мне в @antonbelousoff - могу поделиться своим)
+- API ключ [Shodan](https://shodan.io) (напишите мне в @antonbelousoff - могу поделиться своим)
+
+## Структура проекта
+
+* [agent_langgraph](agent_langgraph/README.md) - простой сканер безопасности на базе LangGraph
+* [agent_langgraph_mcp](agent_langgraph_mcp/README.md) - комбинированный подход LangGraph и MCP
+* [agent_langgraph_swarm](agent_langgraph_swarm/README.md) - рой агентов на базе LangGraph
+* [agent_mcp_swarm](agent_mcp_swarm/README.md) - рой агентов на базе MCP, агенты как MCP инструменты
+
+## Установка
+
+Установите зависимости:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv sync --active
+```
 
 ## Использование
 
 Каждый агент может быть запущен из командной строки с IP-адресом или доменом в качестве входного параметра:
 
 ```bash
-python -m <имя-подпроекта>.main <хост>
+python -m <имя-агента>.main <цель>
 ```
 
-1. запуск агента LangGraph:
+Например, запуск агента LangGraph:
 
-   ```bash
-   python -m agent_langgraph.main 1.2.3.4
-   ```
+```bash
+python -m agent_langgraph.main 1.2.3.4
+```
 
-2. запуск агента LangGraph-MCP:
+## ВНЕЗАПНЫЙ КОНКУРС!
 
-   ```bash
-   python -m agent_langgraph_mcp.main 1.2.3.4
-   ```
+Подключите [metasploit](https://metasploit.com/) через MCP к агенту [agent_multi_mcp](agent_multi_mcp/), чтобы агент умел вызывать сканирование цели с помощью модулей metasploit. 
+Можно воспользоваться готовым [MCP сервером](https://github.com/GH05TCREW/MetasploitMCP) или написать простенький свой.
 
-3. запуск агента LangGraph-Swarm:
-
-   ```bash
-   python -m agent_langgraph_swarm.main 1.2.3.4
-   ```
-
-4. запуск агента MCP:
-
-   ```bash
-   python -m agent_mcp.main 1.2.3.4
-   ```
-
-## Домашнее задание
-
-Подключите MCP Metasploit к агенту LangGraph-MCP, чтобы бот умел вызывать сканирование с помощью модулей metasploit. Можно воспользоваться готовым [MCP сервером](https://github.com/GH05TCREW/MetasploitMCP) или написать простенький свой.
-
-С вас пулл-реквест, с меня секретный приз первому, оформившему рабочий PR.
+С вас пулл-реквест, с меня секретный приз первому, оформившему работающий PR.
 
 ## Лицензия
 

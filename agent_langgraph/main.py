@@ -1,3 +1,7 @@
+"""
+Agent entry point
+"""
+
 import asyncio
 from json import dumps
 

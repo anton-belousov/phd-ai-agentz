@@ -1,3 +1,7 @@
+"""
+Simple security scanner using LangGraph
+"""
+
 from typing import Literal
 
 from langchain_core.messages import AIMessage, AnyMessage, ToolMessage
