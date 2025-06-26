@@ -2,14 +2,14 @@
 Agent data models
 """
 
-from typing import Annotated, TypedDict
-
-from langchain_core.messages import AnyMessage
-from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
 
 class AnalysisResult(BaseModel):
+    """
+    Result of the security scan.
+    """
+
     has_security_issues: bool = Field(
         description="Whether the host has security issues"
     )
@@ -23,15 +23,3 @@ class AnalysisResult(BaseModel):
     )
     os_info: str = Field(description="The operating system information of the host")
     other_information: str = Field(description="Other information about the host")
-
-
-class AgentInputState(TypedDict):
-    host: str
-
-
-class AgentOutputState(TypedDict):
-    result: AnalysisResult
-
-
-class AgentState(AgentInputState, AgentOutputState):
-    messages: Annotated[list[AnyMessage], add_messages]

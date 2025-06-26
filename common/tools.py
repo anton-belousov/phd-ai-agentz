@@ -1,8 +1,11 @@
+"""
+Security tools
+"""
+
 from asyncio import create_subprocess_shell, subprocess, wait_for
 from json import dumps
 
 import shodan
-from langchain_core.tools import tool
 from rich.console import Console
 
 from common.config import SHODAN_API_KEY
@@ -22,7 +25,6 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
     )
 
 
-@tool(description="Get IP address for the given domain")
 async def nslookup(domain: str) -> str:
     """Execute nslookup command and return results."""
     console.print(f"[bold blue]Looking up {domain} with nslookup...[/bold blue]")
@@ -40,7 +42,6 @@ async def nslookup(domain: str) -> str:
         return str(e)
 
 
-@tool(description="Ping a given IP address")
 async def ping(ip_address: str) -> str:
     """Execute ping command and return results."""
     console.print(f"[bold blue]Pinging {ip_address}...[/bold blue]")
@@ -62,7 +63,6 @@ async def ping(ip_address: str) -> str:
         return str(e)
 
 
-@tool(description="Traceroute a given IP address")
 async def traceroute(ip_address: str) -> str:
     """Execute traceroute command and return results."""
     console.print(f"[bold blue]Tracerouting {ip_address}...[/bold blue]")
@@ -81,7 +81,6 @@ async def traceroute(ip_address: str) -> str:
         return str(e)
 
 
-@tool(description="Scan a given IP address with nmap")
 async def nmap_scan(ip_address: str) -> str:
     """Execute nmap scan and return results."""
     console.print(f"[bold blue]Scanning {ip_address} with nmap...[/bold blue]")
@@ -101,7 +100,6 @@ async def nmap_scan(ip_address: str) -> str:
         return str(e)
 
 
-@tool(description="Look up IP address information using Shodan API")
 async def shodan_lookup(ip_address: str) -> str:
     """Look up IP address information using Shodan API."""
     console.print(f"[bold blue]Looking up {ip_address} with Shodan...[/bold blue]")

@@ -10,6 +10,10 @@ from pydantic import BaseModel, Field
 
 
 class AnalysisResult(BaseModel):
+    """
+    Result of the security scan.
+    """
+
     has_security_issues: bool = Field(
         description="Whether the host has security issues"
     )
@@ -26,12 +30,24 @@ class AnalysisResult(BaseModel):
 
 
 class AgentInputState(TypedDict):
+    """
+    Input state for the agent.
+    """
+
     host: str
 
 
 class AgentOutputState(TypedDict):
+    """
+    Output state for the agent.
+    """
+
     result: AnalysisResult
 
 
 class AgentState(AgentInputState, AgentOutputState):
+    """
+    State of the agent.
+    """
+
     messages: Annotated[list[AnyMessage], add_messages]

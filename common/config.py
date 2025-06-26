@@ -1,3 +1,7 @@
+"""
+Configuration
+"""
+
 import os
 
 from dotenv import load_dotenv
@@ -8,3 +12,5 @@ SHODAN_API_KEY = os.getenv("SHODAN_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_MODEL = os.getenv("OPENAI_API_MODEL")
 OPENAI_API_URL = os.getenv("OPENAI_API_URL")
+
+NMAP_PATH = os.getenv("NMAP_PATH")

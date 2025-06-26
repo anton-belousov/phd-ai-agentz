@@ -16,8 +16,14 @@ from common.config import (
     OPENAI_API_MODEL,
     OPENAI_API_URL,
 )
+from common.langchain_tools import (
+    nmap_scan_tool,
+    nslookup_tool,
+    ping_tool,
+    shodan_lookup_tool,
+    traceroute_tool,
+)
 from common.prompts import get_prompt_template
-from common.tools import nmap_scan, nslookup, ping, shodan_lookup, traceroute
 
 from .models import AgentInputState, AgentOutputState, AgentState, AnalysisResult
 from .prompts import ANALYSIS_PROMPT, FIRST_PROMPT, SUBSEQUENT_PROMPT, SYSTEM_PROMPT
@@ -27,11 +33,11 @@ MAX_ATTEMPTS = 3
 
 console = Console()
 all_tools = {
-    "ping": ping,
-    "traceroute": traceroute,
-    "nmap_scan": nmap_scan,
-    "shodan_lookup": shodan_lookup,
-    "nslookup": nslookup,
+    "ping": ping_tool,
+    "traceroute": traceroute_tool,
+    "nmap_scan": nmap_scan_tool,
+    "shodan_lookup": shodan_lookup_tool,
+    "nslookup": nslookup_tool,
 }
 
 
