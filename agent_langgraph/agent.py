@@ -32,19 +32,13 @@ MAX_ATTEMPTS = 3
 
 
 console = Console()
-all_tools = {
-    "ping_tool": ping_tool,
-    "traceroute_tool": traceroute_tool,
-    "nmap_scan_tool": nmap_scan_tool,
-    "shodan_lookup_tool": shodan_lookup_tool,
-    "nslookup_tool": nslookup_tool,
-}
 
 
-def create_security_agent():
+def create_security_agent(tools: list[BaseTool]):
     llm = ChatOpenAI(
         model=OPENAI_API_MODEL, api_key=OPENAI_API_KEY, base_url=OPENAI_API_URL
     )
+    tool_name_to_tool: dict[str, BaseTool] = {tool.name: tool for tool in tools}
 
     async def run_security_tools(state: AgentState) -> AgentState:
         """Run security tools on the IP address."""
@@ -63,7 +57,7 @@ def create_security_agent():
         else:
             new_messages = get_prompt_template(SUBSEQUENT_PROMPT).format_messages()
 
-        response: AIMessage = await llm.bind_tools(all_tools.values()).ainvoke(
+        response: AIMessage = await llm.bind_tools(tools).ainvoke(
             messages + new_messages
         )
         new_messages.append(response)
@@ -96,7 +90,7 @@ def create_security_agent():
             console.print(
                 f"[bold blue]Calling tool: {tool_call['name']}...[/bold blue]"
             )
-            tool: BaseTool | None = all_tools.get(tool_call["name"])
+            tool: BaseTool | None = tool_name_to_tool.get(tool_call["name"])
 
             if not tool:
                 console.print(f"[red]Tool not found: {tool_call['name']}[/red]")
@@ -144,10 +138,18 @@ def create_security_agent():
     return graph.compile()
 
 
-async def run_security_scan(host: str) -> AgentOutputState:
+async def run_security_scan(host: str) -> AnalysisResult:
     """Run a complete security scan on the given host."""
-    agent = create_security_agent()
+    agent = create_security_agent(
+        [
+            ping_tool,
+            traceroute_tool,
+            nmap_scan_tool,
+            shodan_lookup_tool,
+            nslookup_tool,
+        ]
+    )
     input_state = AgentInputState(host=host)
     output_state: AgentOutputState = await agent.ainvoke(input_state)
 
-    return output_state
+    return output_state["result"]

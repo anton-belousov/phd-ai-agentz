@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from .agent import run_security_scan
-from .models import AgentOutputState
+from .models import AnalysisResult
 
 app = typer.Typer()
 console = Console()
@@ -24,11 +24,11 @@ def scan(
 
     try:
         console.print(f"[bold blue]Starting security scan for {host}...[/bold blue]")
-        result: AgentOutputState = asyncio.run(run_security_scan(host))
+        result: AnalysisResult = asyncio.run(run_security_scan(host))
 
         console.print(
             Panel(
-                result["result"].model_dump_json(indent=4),
+                result.model_dump_json(indent=4),
                 title="Analysis",
                 border_style="green",
             )
