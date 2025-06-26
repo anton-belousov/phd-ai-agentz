@@ -8,24 +8,21 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import BaseTool
 from langchain_mcp_adapters.tools import load_mcp_tools
 from langgraph.prebuilt import create_react_agent
-from mcp import ClientSession, StdioServerParameters
-from mcp.client.stdio import stdio_client
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
 
 from common.config import OPENAI_API_MODEL
 
 from .models import AnalysisResult
 from .prompts import FIRST_PROMPT
 
-server_params = StdioServerParameters(
-    command="python",
-    args=["./server.py"],
-)
+SERVER_URL = "http://localhost:8000/mcp"
 
 
 async def run_security_scan(host: str) -> AnalysisResult:
     """Run a complete security scan on the given host."""
 
-    async with stdio_client(server_params) as (read, write):
+    async with streamablehttp_client(SERVER_URL) as (read, write, _):
         async with ClientSession(read, write) as session:
             await session.initialize()
 

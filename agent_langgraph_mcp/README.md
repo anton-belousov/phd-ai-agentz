@@ -8,5 +8,9 @@
 ## Запуск:
 
 ```bash
+# в одной консоли
+pythom -m agent_langgraph_mcp.server
+
+# в другой консоли
 python -m agent_langgraph_mcp.main <цель>
 ```
