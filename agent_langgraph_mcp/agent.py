@@ -7,8 +7,8 @@ from langchain_mcp_adapters.tools import load_mcp_tools
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
-from ..agent_langgraph.agent import create_security_agent
-from ..agent_langgraph.models import AgentInputState, AgentOutputState, AnalysisResult
+from agent_langgraph.agent import create_security_agent
+from agent_langgraph.models import AgentInputState, AgentOutputState, AnalysisResult
 
 SERVER_URL = "http://localhost:8000/mcp"
 

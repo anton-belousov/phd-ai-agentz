@@ -8,7 +8,8 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from ..agent_langgraph.models import AnalysisResult
+from agent_langgraph.models import AnalysisResult
+
 from .agent import run_security_scan
 
 app = typer.Typer()
