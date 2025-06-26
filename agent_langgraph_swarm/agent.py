@@ -124,7 +124,12 @@ async def run_security_scan(host: str) -> AnalysisResult:
     """Run a complete security scan on the given host."""
     agent = create_security_agent()
     template = get_prompt_template(REQUEST_PROCESSING_PROMPT)
-    output = await agent.ainvoke({"messages": template.format_messages(host=host)})
+
+    config = {"configurable": {"thread_id": "1"}}
+
+    output = await agent.ainvoke(
+        {"messages": template.format_messages(host=host)}, config
+    )
 
     print(output)
 
