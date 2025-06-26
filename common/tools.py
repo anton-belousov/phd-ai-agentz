@@ -32,7 +32,7 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
 
     except TimeoutError:
         console.print(
-            f"[bold red]\t\t{command} timed out after {timeout} seconds[/bold red]"
+            f"[bold red]\t{command} timed out after {timeout} seconds[/bold red]"
         )
         process.terminate()
         await process.wait()

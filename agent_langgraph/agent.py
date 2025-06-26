@@ -115,8 +115,6 @@ def create_security_agent():
             ANALYSIS_PROMPT
         ).format_messages(host=state["host"])
 
-        console.print(f"messages: {messages}")
-
         response: AnalysisResult = await llm.with_structured_output(
             AnalysisResult
         ).ainvoke(messages)
