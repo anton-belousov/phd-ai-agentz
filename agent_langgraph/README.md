@@ -13,6 +13,8 @@
 
 ## Запуск:
 
+Из корня репозитория:
+
 ```bash
 python -m agent_langgraph.main <цель>
 ```

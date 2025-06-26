@@ -8,11 +8,9 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 from agent_langgraph.agent import create_security_agent
 from agent_langgraph.models import AgentInputState, AgentOutputState, AnalysisResult
 
-SERVER_URL = "http://localhost:8000/mcp"
-
-CLIENT_PARAMS = {
+MCP_SERVERS = {
     "security": {
-        "url": SERVER_URL,
+        "url": "http://localhost:8000/mcp",
         "transport": "streamable_http",
     }
 }
@@ -21,7 +19,7 @@ CLIENT_PARAMS = {
 async def run_security_scan(host: str) -> AnalysisResult:
     """Run a complete security scan on the given host."""
 
-    client = MultiServerMCPClient(CLIENT_PARAMS)
+    client = MultiServerMCPClient(MCP_SERVERS)
     tools: list[BaseTool] = await client.get_tools()
     agent = create_security_agent(tools)
 
