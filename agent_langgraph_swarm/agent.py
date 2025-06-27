@@ -10,6 +10,7 @@ from langgraph_swarm import create_handoff_tool, create_swarm
 from rich.console import Console
 
 from common.config import (
+    DEBUG_SWARM,
     OPENAI_API_KEY,
     OPENAI_API_MODEL,
     OPENAI_API_URL,
@@ -34,15 +35,14 @@ from .prompts import (
 
 MAX_ATTEMPTS = 3
 
-
 console = Console()
 
 
 def create_security_swarm():
     """
-    Создание агентов
+    Создание роя агентов
+    https://www.youtube.com/watch?v=tx6wJcVQRp8 (извините)
     """
-
     llm = ChatOpenAI(
         model=OPENAI_API_MODEL, api_key=OPENAI_API_KEY, base_url=OPENAI_API_URL
     )
@@ -96,6 +96,7 @@ def create_security_swarm():
         request_processing_tools,
         prompt=REQUEST_PROCESSING_SYSTEM_PROMPT,
         name="request_processing_agent",
+        debug=DEBUG_SWARM,
     )
 
     network_agent = create_react_agent(
@@ -103,6 +104,7 @@ def create_security_swarm():
         network_tools,
         prompt=NETWORK_SYSTEM_PROMPT,
         name="network_agent",
+        debug=DEBUG_SWARM,
     )
 
     security_agent = create_react_agent(
@@ -110,14 +112,16 @@ def create_security_swarm():
         security_tools,
         prompt=SECURITY_SYSTEM_PROMPT,
         name="security_agent",
+        debug=DEBUG_SWARM,
     )
 
     analysis_agent = create_react_agent(
         llm,
         [],
         prompt=ANALYSIS_SYSTEM_PROMPT,
-        response_format=AnalysisResult,
+        response_format=(ANALYSIS_SYSTEM_PROMPT, AnalysisResult),
         name="analysis_agent",
+        debug=DEBUG_SWARM,
     )
 
     checkpointer = InMemorySaver()
@@ -137,7 +141,6 @@ async def run_security_scan(host: str) -> AnalysisResult:
     """
     Выполняет сканирование хоста
     """
-
     swarm = create_security_swarm()
     template = get_prompt_template(REQUEST_PROCESSING_PROMPT)
     config = {"configurable": {"thread_id": "1"}}

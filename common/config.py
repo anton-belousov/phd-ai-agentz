@@ -13,4 +13,4 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_MODEL = os.getenv("OPENAI_API_MODEL")
 OPENAI_API_URL = os.getenv("OPENAI_API_URL")
 
-NMAP_PATH = os.getenv("NMAP_PATH")
+DEBUG_SWARM = os.getenv("DEBUG_SWARM", "false").lower() == "true"

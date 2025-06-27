@@ -1,5 +1,5 @@
 """
-Agent data models
+Модели данных для агента
 """
 
 from typing import Any
@@ -10,10 +10,19 @@ from pydantic import BaseModel, Field
 
 class CustomSwarmState(SwarmState):
     """
-    Custom swarm state.
+    Выходное состояние для роя
     """
 
     structured_response: Any
+
+
+class WebApp(BaseModel):
+    """
+    Веб-приложение.
+    """
+
+    name: str = Field(description="Название веб-приложения")
+    info: str = Field(description="Информация о веб-приложении")
 
 
 class AnalysisResult(BaseModel):
@@ -34,7 +43,8 @@ class AnalysisResult(BaseModel):
         description="Сетевая информация о хосте - IP-адрес, пинг, трассировка, и т.д."
     )
     os_info: str = Field(description="Информация о операционной системе хоста")
-    web_apps: list[str] = Field(
+    web_apps: list[WebApp] = Field(
         description="Список веб-приложений, запущенных на хосте"
     )
+    ssl_info: str = Field(description="Информация о SSL-сертификатах на хосте")
     other_information: str = Field(description="Другая информация о хосте")

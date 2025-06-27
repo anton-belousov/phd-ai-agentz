@@ -44,7 +44,7 @@ uv sync --active
 
 Смотрите документацию каждого агента для информации о запуске.
 
-## Что же использовать в моём проекте?
+## Что же использовать в своём проекте?
 
 [Мы](https://киберразведка.рф) используем подход описанный в [agent_langgraph](agent_langgraph/) и [agent_langgraph_mcp](agent_langgraph_mcp/).
 
@@ -53,10 +53,11 @@ uv sync --active
 
 ## ВНЕЗАПНЫЙ КОНКУРС!
 
-Подключите [metasploit](https://metasploit.com/) через MCP к агенту [agent_mcp_swarm](agent_mcp_swarm/), чтобы агент умел вызывать сканирование цели с помощью модулей metasploit. 
+Подключите [metasploit](https://metasploit.com/) через MCP к агенту [agent_mcp_swarm](agent_mcp_swarm/) или [agent_langgraph_mcp](agent_langgraph_mcp/), чтобы агент умел вызывать сканирование цели с помощью модулей metasploit. 
+
 Можно воспользоваться готовым [MCP сервером](https://github.com/GH05TCREW/MetasploitMCP) или написать простенький свой.
 
-С вас пулл-реквест, с меня секретный приз первому, оформившему работающий PR.
+С вас пулл-реквест, с меня 10 000 рублей на карту первому, оформившему работающий PR.
 
 ## Лицензия
 

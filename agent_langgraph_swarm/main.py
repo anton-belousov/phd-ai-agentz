@@ -17,25 +17,27 @@ console = Console()
 
 @app.command()
 def scan(
-    host: str = typer.Argument(..., help="Host (IP address or domain) to scan"),
+    host: str = typer.Argument(..., help="Хост (IP-адрес или домен) для сканирования"),
 ):
-    """Run a security scan on the specified host."""
-    console.print("[bold green]Starting security scan...[/bold green]")
+    """
+    Выполняет сканирование хоста
+    """
+    console.print("[bold green]Запуск сканирования...[/bold green]")
 
     try:
-        console.print(f"[bold blue]Starting security scan for {host}...[/bold blue]")
+        console.print(f"[bold blue]\tЗапуск сканирования для {host}...[/bold blue]")
         result: AnalysisResult = asyncio.run(run_security_scan(host))
 
         console.print(
             Panel(
                 result.model_dump_json(indent=4),
-                title="Analysis",
+                title="Результат",
                 border_style="green",
             )
         )
 
     except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
+        console.print(f"[red]\tОшибка: {str(e)}[/red]")
         raise
 
 
