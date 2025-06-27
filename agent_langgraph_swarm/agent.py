@@ -1,5 +1,5 @@
 """
-Simple security scanner using LangGraph Swarm
+Простой сканер безопасности, который использует LangGraph Swarm для выполнения инструментов.
 """
 
 from langchain_openai import ChatOpenAI
@@ -14,9 +14,16 @@ from common.config import (
     OPENAI_API_MODEL,
     OPENAI_API_URL,
 )
+from common.langchain_tools import (
+    nmap_scan_tool,
+    nslookup_tool,
+    ping_tool,
+    shodan_lookup_tool,
+    traceroute_tool,
+)
 from common.prompts import get_prompt_template
 
-from .models import AnalysisResult
+from .models import AnalysisResult, CustomSwarmState
 from .prompts import (
     ANALYSIS_SYSTEM_PROMPT,
     NETWORK_SYSTEM_PROMPT,
@@ -31,106 +38,118 @@ MAX_ATTEMPTS = 3
 console = Console()
 
 
-def create_security_agent():
+def create_security_swarm():
+    """
+    Создание агентов
+    """
+
     llm = ChatOpenAI(
         model=OPENAI_API_MODEL, api_key=OPENAI_API_KEY, base_url=OPENAI_API_URL
     )
 
+    request_procesing_handoff = create_handoff_tool(
+        agent_name="request_processing_agent",
+        description="Processes user's requests",
+    )
+    network_handoff = create_handoff_tool(
+        agent_name="network_agent", description="Network scanning agent"
+    )
+    security_handoff = create_handoff_tool(
+        agent_name="security_agent", description="Security scanning agent"
+    )
+    analysis_handoff = create_handoff_tool(
+        agent_name="analysis_agent", description="Data analysis agent"
+    )
+
+    # выписываем инструменты для каждого агента и вручную добавляем в LLM,
+    # потому что в LangGraph Swarm нет поддержки параллельных вызовов инструментов - он не успевает добавить результаты инструментов в очередь сообщений
+    # и всё нахрен падает
+    request_processing_tools = [
+        network_handoff,
+        security_handoff,
+        analysis_handoff,
+    ]
+    network_tools = [
+        nslookup_tool,
+        ping_tool,
+        traceroute_tool,
+        request_procesing_handoff,
+        security_handoff,
+        analysis_handoff,
+    ]
+    security_tools = [
+        shodan_lookup_tool,
+        nmap_scan_tool,
+        request_procesing_handoff,
+        network_handoff,
+        analysis_handoff,
+    ]
+
+    llm_with_request_processing_tools = llm.bind_tools(
+        request_processing_tools, parallel_tool_calls=False
+    )
+    llm_with_network_tools = llm.bind_tools(network_tools, parallel_tool_calls=False)
+    llm_with_security_tools = llm.bind_tools(security_tools, parallel_tool_calls=False)
+
     request_processing_agent = create_react_agent(
-        llm,
-        [
-            create_handoff_tool(
-                agent_name="network_agent", description="Network scanning agent"
-            ),
-            create_handoff_tool(
-                agent_name="security_agent", description="Security scanning agent"
-            ),
-            create_handoff_tool(
-                agent_name="analysis_agent", description="Data analysis agent"
-            ),
-        ],
+        llm_with_request_processing_tools,
+        request_processing_tools,
         prompt=REQUEST_PROCESSING_SYSTEM_PROMPT,
         name="request_processing_agent",
     )
 
     network_agent = create_react_agent(
-        llm,
-        [
-            create_handoff_tool(
-                agent_name="request_processing_agent",
-                description="Processes user's requests",
-            ),
-            create_handoff_tool(
-                agent_name="security_agent", description="Security scanning agent"
-            ),
-            create_handoff_tool(
-                agent_name="analysis_agent", description="Data analysis agent"
-            ),
-        ],
+        llm_with_network_tools,
+        network_tools,
         prompt=NETWORK_SYSTEM_PROMPT,
         name="network_agent",
     )
 
     security_agent = create_react_agent(
-        llm,
-        [
-            create_handoff_tool(
-                agent_name="request_processing_agent",
-                description="Processes user's requests",
-            ),
-            create_handoff_tool(
-                agent_name="network_agent", description="Network scanning agent"
-            ),
-            create_handoff_tool(
-                agent_name="analysis_agent", description="Data analysis agent"
-            ),
-        ],
+        llm_with_security_tools,
+        security_tools,
         prompt=SECURITY_SYSTEM_PROMPT,
         name="security_agent",
     )
 
     analysis_agent = create_react_agent(
         llm,
-        [
-            create_handoff_tool(
-                agent_name="request_processing_agent",
-                description="Processes user's requests",
-            ),
-            create_handoff_tool(
-                agent_name="network_agent", description="Network scanning agent"
-            ),
-            create_handoff_tool(
-                agent_name="security_agent", description="Security scanning agent"
-            ),
-        ],
+        [],
         prompt=ANALYSIS_SYSTEM_PROMPT,
-        name="analysis_agent",
         response_format=AnalysisResult,
+        name="analysis_agent",
     )
 
     checkpointer = InMemorySaver()
     store = InMemoryStore()
-    agent = create_swarm(
+    swarm = create_swarm(
         [request_processing_agent, network_agent, security_agent, analysis_agent],
         default_active_agent="request_processing_agent",
+        state_schema=CustomSwarmState,
     )
 
-    app = agent.compile(checkpointer=checkpointer, store=store)
+    app = swarm.compile(checkpointer=checkpointer, store=store)
 
     return app
 
 
 async def run_security_scan(host: str) -> AnalysisResult:
-    """Run a complete security scan on the given host."""
-    agent = create_security_agent()
-    template = get_prompt_template(REQUEST_PROCESSING_PROMPT)
+    """
+    Выполняет сканирование хоста
+    """
 
+    swarm = create_security_swarm()
+    template = get_prompt_template(REQUEST_PROCESSING_PROMPT)
     config = {"configurable": {"thread_id": "1"}}
 
-    output = await agent.ainvoke(
+    # CustomSwarmState - это состояние роя, которое мы используем для хранения результатов
+    # Нам нужен structured_response из analysis_agent, который содержит результаты сканирования
+    # Иначе рой вернёт просто список сообщений, а не структурированный ответ
+    output: CustomSwarmState = await swarm.ainvoke(
         {"messages": template.format_messages(host=host)}, config
     )
 
-    print(output)
+    assert "structured_response" in output
+    assert isinstance(output["structured_response"], AnalysisResult)
 
-    return output
+    return output["structured_response"]

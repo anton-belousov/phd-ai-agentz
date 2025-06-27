@@ -1,5 +1,5 @@
 """
-Simple security scanner using LangGraph
+Простой сканер безопасности, который использует LangGraph для выполнения инструментов.
 """
 
 from typing import Literal
@@ -35,6 +35,10 @@ console = Console()
 
 
 def create_security_agent(tools: list[BaseTool]):
+    """
+    Создание агента
+    """
+
     llm = ChatOpenAI(
         model=OPENAI_API_MODEL, api_key=OPENAI_API_KEY, base_url=OPENAI_API_URL
     )
@@ -139,7 +143,10 @@ def create_security_agent(tools: list[BaseTool]):
 
 
 async def run_security_scan(host: str) -> AnalysisResult:
-    """Run a complete security scan on the given host."""
+    """
+    Run a complete security scan on the given host.
+    """
+
     agent = create_security_agent(
         [
             ping_tool,

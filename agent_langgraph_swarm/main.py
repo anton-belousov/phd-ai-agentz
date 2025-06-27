@@ -1,5 +1,5 @@
 """
-Agent entry point
+Входная точка для запуска роя
 """
 
 import asyncio

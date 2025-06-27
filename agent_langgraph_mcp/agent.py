@@ -17,7 +17,9 @@ MCP_SERVERS = {
 
 
 async def run_security_scan(host: str) -> AnalysisResult:
-    """Run a complete security scan on the given host."""
+    """
+    Run a complete security scan on the given host.
+    """
 
     client = MultiServerMCPClient(MCP_SERVERS)
     tools: list[BaseTool] = await client.get_tools()

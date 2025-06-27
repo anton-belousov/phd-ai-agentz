@@ -20,7 +20,10 @@ console = Console()
 def scan(
     host: str = typer.Argument(..., help="Host (IP address or domain) to scan"),
 ):
-    """Run a security scan on the specified host."""
+    """
+    Run a security scan on the specified host.
+    """
+
     console.print("[bold green]Starting security scan...[/bold green]")
 
     try:

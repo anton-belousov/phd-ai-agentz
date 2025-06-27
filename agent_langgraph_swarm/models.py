@@ -2,12 +2,23 @@
 Agent data models
 """
 
+from typing import Any
+
+from langgraph_swarm import SwarmState
 from pydantic import BaseModel, Field
+
+
+class CustomSwarmState(SwarmState):
+    """
+    Custom swarm state.
+    """
+
+    structured_response: Any
 
 
 class AnalysisResult(BaseModel):
     """
-    Result of the security scan.
+    Результат сканирования безопасности хоста.
     """
 
     has_security_issues: bool = Field(
