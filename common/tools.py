@@ -1,5 +1,5 @@
 """
-Security tools
+Инструменты для сканирования
 """
 
 from asyncio import TimeoutError, create_subprocess_shell, subprocess, wait_for
@@ -14,8 +14,10 @@ console = Console()
 
 
 async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
-    """Run a command and return the results."""
-    console.print(f"[bold blue]\tRunning {command}...[/bold blue]")
+    """
+    Выполняет команду и возвращает результат.
+    """
+    console.print(f"[bold blue]\tВыполнение команды: {command}...[/bold blue]")
 
     process: subprocess.Process = await create_subprocess_shell(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -26,22 +28,30 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
         return_code = process.returncode
 
         if return_code != 0:
-            return stderr.decode()
+            error_result: str | None = stderr.decode()
+
+            if not error_result:
+                error_result = "Error running command"
+
+            return error_result
 
         return stdout.decode()
 
     except TimeoutError:
         console.print(
-            f"[bold red]\t{command} timed out after {timeout} seconds[/bold red]"
+            f"[bold red]\t{command} завершилась по таймауту {timeout} секунд[/bold red]"
         )
         process.terminate()
         await process.wait()
-        raise
+
+        raise RuntimeError("Command has timed out")
 
 
 async def nslookup(domain: str) -> str:
-    """Execute nslookup command and return results."""
-    console.print(f"[bold blue]Looking up {domain} with nslookup...[/bold blue]")
+    """
+    Выполняет nslookup и возвращает результат.
+    """
+    console.print(f"[bold blue]\tПоиск {domain} с помощью nslookup...[/bold blue]")
 
     try:
         return await _run_command(" ".join(["nslookup", domain]))
@@ -51,8 +61,10 @@ async def nslookup(domain: str) -> str:
 
 
 async def ping(ip_address: str) -> str:
-    """Execute ping command and return results."""
-    console.print(f"[bold blue]Pinging {ip_address}...[/bold blue]")
+    """
+    Выполняет ping и возвращает результат.
+    """
+    console.print(f"[bold blue]\tПинг {ip_address}...[/bold blue]")
 
     try:
         return await _run_command(" ".join(["ping", "-c", "4", ip_address]))
@@ -62,34 +74,48 @@ async def ping(ip_address: str) -> str:
 
 
 async def traceroute(ip_address: str) -> str:
-    """Execute traceroute command and return results."""
-    console.print(f"[bold blue]Tracerouting {ip_address}...[/bold blue]")
+    """
+    Выполняет traceroute и возвращает результат.
+    """
+    console.print(f"[bold blue]\tТрассировка {ip_address}...[/bold blue]")
+
     try:
-        return await _run_command(" ".join(["traceroute", ip_address]))
+        return await _run_command(
+            " ".join(["traceroute", "-w", "1", "-q", "1", "-m", "20", ip_address]),
+            timeout=120,
+        )
 
     except Exception as e:
         return str(e)
 
 
 async def nmap_scan(ip_address: str) -> str:
-    """Execute nmap scan and return results."""
-    console.print(f"[bold blue]Scanning {ip_address} with nmap...[/bold blue]")
+    """
+    Выполняет nmap-сканирование и возвращает результат.
+    """
+    console.print(
+        f"[bold blue]\tСканирование {ip_address} с помощью nmap...[/bold blue]"
+    )
 
     try:
-        return await _run_command(" ".join(["nmap", "-sV", ip_address]))
+        return await _run_command(
+            " ".join(["nmap", "-sV", "-v", "-A", "-T4", "-Pn", ip_address]), timeout=120
+        )
 
     except Exception as e:
         return str(e)
 
 
 async def shodan_lookup(ip_address: str) -> str:
-    """Look up IP address information using Shodan API."""
-    console.print(f"[bold blue]Looking up {ip_address} with Shodan...[/bold blue]")
+    """
+    Ищет информацию о IP-адресе с помощью Shodan API.
+    """
+    console.print(f"[bold blue]\tПоиск {ip_address} с помощью Shodan...[/bold blue]")
 
     shodan_client = shodan.Shodan(SHODAN_API_KEY) if SHODAN_API_KEY else None
 
     if not shodan_client:
-        raise RuntimeError("Shodan API key not configured")
+        raise RuntimeError("Shodan API ключ не настроен")
 
     try:
         result = shodan_client.host(ip_address)

@@ -1,5 +1,5 @@
 """
-Configuration
+Конфигурация
 """
 
 import os

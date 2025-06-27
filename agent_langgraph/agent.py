@@ -26,7 +26,7 @@ from common.langchain_tools import (
 from common.prompts import get_prompt_template
 
 from .models import AgentInputState, AgentOutputState, AgentState, AnalysisResult
-from .prompts import ANALYSIS_PROMPT, FIRST_PROMPT, SUBSEQUENT_PROMPT, SYSTEM_PROMPT
+from .prompts import AGENT_PROMPT, ANALYSIS_PROMPT, SUBSEQUENT_PROMPT, SYSTEM_PROMPT
 
 MAX_ATTEMPTS = 3
 
@@ -38,16 +38,16 @@ def create_security_agent(tools: list[BaseTool]):
     """
     Создание агента
     """
-
     llm = ChatOpenAI(
         model=OPENAI_API_MODEL, api_key=OPENAI_API_KEY, base_url=OPENAI_API_URL
     )
     tool_name_to_tool: dict[str, BaseTool] = {tool.name: tool for tool in tools}
 
-    async def run_security_tools(state: AgentState) -> AgentState:
-        """Run security tools on the IP address."""
-        console.print("[bold blue]Running security tools...[/bold blue]")
-        console.print(f"state.messages: {len(state['messages'])}")
+    async def agent(state: AgentState) -> AgentState:
+        """
+        Вызов агента
+        """
+        console.print("[bold blue]Вызов агента...[/bold blue]")
         host = state["host"]
 
         messages: list[AnyMessage] = state["messages"]
@@ -55,7 +55,7 @@ def create_security_agent(tools: list[BaseTool]):
 
         if not messages:
             new_messages = get_prompt_template(
-                FIRST_PROMPT, SYSTEM_PROMPT
+                AGENT_PROMPT, SYSTEM_PROMPT
             ).format_messages(host=host)
 
         else:
@@ -71,8 +71,10 @@ def create_security_agent(tools: list[BaseTool]):
     async def should_continue(
         state: AgentState,
     ) -> Literal["call_tool", "analyze_results"]:
-        """Should continue check"""
-        console.print("[bold blue]Should continue check...[/bold blue]")
+        """
+        Проверяет, нужно ли продолжать выполнение инструментов
+        """
+        console.print("[bold blue]Проверка продолжения...[/bold blue]")
 
         messages: list[AnyMessage] = state["messages"]
         last_message: AnyMessage = messages[-1]
@@ -83,8 +85,10 @@ def create_security_agent(tools: list[BaseTool]):
         return "analyze_results"
 
     async def call_tool(state: AgentState) -> AgentState:
-        """Call tool"""
-        console.print("[bold blue]Calling tool...[/bold blue]")
+        """
+        Вызов инструмента
+        """
+        console.print("[bold blue]Вызов инструмента...[/bold blue]")
 
         messages: list[AnyMessage] = state["messages"]
         last_message: AIMessage = messages[-1]
@@ -92,12 +96,12 @@ def create_security_agent(tools: list[BaseTool]):
 
         for tool_call in last_message.tool_calls:
             console.print(
-                f"[bold blue]Calling tool: {tool_call['name']}...[/bold blue]"
+                f"[bold blue]\tВызов инструмента: {tool_call['name']}...[/bold blue]"
             )
             tool: BaseTool | None = tool_name_to_tool.get(tool_call["name"])
 
             if not tool:
-                console.print(f"[red]Tool not found: {tool_call['name']}[/red]")
+                console.print(f"[red]\tИнструмент не найден: {tool_call['name']}[/red]")
                 continue
 
             tool_message: ToolMessage = await tool.ainvoke(tool_call)
@@ -106,8 +110,10 @@ def create_security_agent(tools: list[BaseTool]):
         return AgentState(messages=new_messages)
 
     async def analyze_results(state: AgentState) -> AgentOutputState:
-        """Analyze the results from all tools and provide insights."""
-        console.print("[bold blue]Analyzing results...[/bold blue]")
+        """
+        Анализирует результаты всех инструментов и предоставляет результат.
+        """
+        console.print("[bold blue]Анализ результатов...[/bold blue]")
 
         messages = state["messages"] + get_prompt_template(
             ANALYSIS_PROMPT
@@ -120,23 +126,17 @@ def create_security_agent(tools: list[BaseTool]):
         return AgentOutputState(result=response)
 
     graph = StateGraph(AgentState, input=AgentInputState, output=AgentOutputState)
-    graph.add_node(
-        "run_security_tools",
-        run_security_tools,
-        retry=RetryPolicy(max_attempts=MAX_ATTEMPTS),
-    )
+    graph.add_node("agent", agent, retry=RetryPolicy(max_attempts=MAX_ATTEMPTS))
     graph.add_node("call_tool", call_tool, retry=RetryPolicy(max_attempts=MAX_ATTEMPTS))
     graph.add_node(
         "analyze_results", analyze_results, retry=RetryPolicy(max_attempts=MAX_ATTEMPTS)
     )
 
-    graph.add_edge(START, "run_security_tools")
+    graph.add_edge(START, "agent")
     graph.add_conditional_edges(
-        "run_security_tools",
-        should_continue,
-        ["call_tool", "analyze_results"],
+        "agent", should_continue, ["call_tool", "analyze_results"]
     )
-    graph.add_edge("call_tool", "run_security_tools")
+    graph.add_edge("call_tool", "agent")
     graph.add_edge("analyze_results", END)
 
     return graph.compile()
@@ -144,9 +144,8 @@ def create_security_agent(tools: list[BaseTool]):
 
 async def run_security_scan(host: str) -> AnalysisResult:
     """
-    Run a complete security scan on the given host.
+    Выполняет сканирование хоста
     """
-
     agent = create_security_agent(
         [
             ping_tool,

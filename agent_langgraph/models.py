@@ -1,5 +1,5 @@
 """
-Agent data models
+Модели данных для агента
 """
 
 from typing import Annotated, TypedDict
@@ -9,29 +9,43 @@ from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
 
+class WebApp(BaseModel):
+    """
+    Веб-приложение.
+    """
+
+    name: str = Field(description="Название веб-приложения")
+    info: str = Field(description="Информация о веб-приложении")
+
+
 class AnalysisResult(BaseModel):
     """
-    Result of the security scan.
+    Результат сканирования безопасности хоста.
     """
 
     has_security_issues: bool = Field(
-        description="Whether the host has security issues"
+        description="Наличие проблем безопасности на хосте"
     )
     identified_issues: list[str] = Field(
-        description="A list of identified security issues"
+        description="Список идентифицированных проблем безопасности"
     )
-    ports: list[str] = Field(description="A list of open ports on the host")
-    services: list[str] = Field(description="A list of services running on the host")
+    ip_addresses: list[str] = Field(description="Список IP-адресов хоста")
+    ports: list[str] = Field(description="Список открытых портов на хосте")
+    services: list[str] = Field(description="Список сервисов, запущенных на хосте")
     network_info: str = Field(
-        description="The network information of the host - IP address, ping, traceroute, etc."
+        description="Сетевая информация о хосте - IP-адрес, пинг, трассировка, и т.д."
     )
-    os_info: str = Field(description="The operating system information of the host")
-    other_information: str = Field(description="Other information about the host")
+    os_info: str = Field(description="Информация о операционной системе хоста")
+    web_apps: list[WebApp] = Field(
+        description="Список веб-приложений, запущенных на хосте"
+    )
+    ssl_info: str = Field(description="Информация о SSL-сертификатах на хосте")
+    other_information: str = Field(description="Другая информация о хосте")
 
 
 class AgentInputState(TypedDict):
     """
-    Input state for the agent.
+    Входное состояние для агента.
     """
 
     host: str
@@ -39,7 +53,7 @@ class AgentInputState(TypedDict):
 
 class AgentOutputState(TypedDict):
     """
-    Output state for the agent.
+    Выходное состояние для агента.
     """
 
     result: AnalysisResult
@@ -47,7 +61,7 @@ class AgentOutputState(TypedDict):
 
 class AgentState(AgentInputState, AgentOutputState):
     """
-    State of the agent.
+    Состояние агента.
     """
 
     messages: Annotated[list[AnyMessage], add_messages]

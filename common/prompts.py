@@ -1,5 +1,5 @@
 """
-Prompt utils
+Утилиты для промптов
 """
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -8,8 +8,9 @@ from langchain_core.prompts import ChatPromptTemplate
 def get_prompt_template(
     prompt: str, system_prompt: str | None = None
 ) -> ChatPromptTemplate:
-    """Get a prompt template for the given prompt."""
-
+    """
+    Получает шаблон промпта
+    """
     messages: list[tuple[str, str]] = []
 
     if system_prompt:

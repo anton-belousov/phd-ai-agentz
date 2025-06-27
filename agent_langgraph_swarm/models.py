@@ -22,15 +22,19 @@ class AnalysisResult(BaseModel):
     """
 
     has_security_issues: bool = Field(
-        description="Whether the host has security issues"
+        description="Наличие проблем безопасности на хосте"
     )
     identified_issues: list[str] = Field(
-        description="A list of identified security issues"
+        description="Список идентифицированных проблем безопасности"
     )
-    ports: list[str] = Field(description="A list of open ports on the host")
-    services: list[str] = Field(description="A list of services running on the host")
+    ip_addresses: list[str] = Field(description="Список IP-адресов хоста")
+    ports: list[str] = Field(description="Список открытых портов на хосте")
+    services: list[str] = Field(description="Список сервисов, запущенных на хосте")
     network_info: str = Field(
-        description="The network information of the host - IP address, ping, traceroute, etc."
+        description="Сетевая информация о хосте - IP-адрес, пинг, трассировка, и т.д."
     )
-    os_info: str = Field(description="The operating system information of the host")
-    other_information: str = Field(description="Other information about the host")
+    os_info: str = Field(description="Информация о операционной системе хоста")
+    web_apps: list[str] = Field(
+        description="Список веб-приложений, запущенных на хосте"
+    )
+    other_information: str = Field(description="Другая информация о хосте")
