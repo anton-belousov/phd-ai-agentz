@@ -13,6 +13,8 @@ from mcp.types import CallToolResult
 from rich.console import Console
 from rich.panel import Panel
 
+from common.exceptions import print_exception
+
 from .agent_server import MCP_SERVER_PORT
 
 AGENT_URL = f"http://localhost:{MCP_SERVER_PORT}/mcp"
@@ -20,17 +22,6 @@ AGENT_URL = f"http://localhost:{MCP_SERVER_PORT}/mcp"
 logging.basicConfig(level=logging.ERROR)
 app = typer.Typer()
 console = Console()
-
-
-def _print_exception(e: Exception):
-    """
-    Выводит ошибку в консоль
-    """
-    if isinstance(e, ExceptionGroup):
-        for exc in e.exceptions:
-            _print_exception(exc)
-    else:
-        console.print(Panel(str(e), title="Ошибка", border_style="red"))
 
 
 def _tool_result_to_json(tool_result: CallToolResult) -> dict | None:
@@ -152,7 +143,7 @@ def scan(
         )
 
     except Exception as e:
-        _print_exception(e)
+        print_exception(e)
 
 
 if __name__ == "__main__":

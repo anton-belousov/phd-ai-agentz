@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from agent_langgraph.models import AnalysisResult
+from common.exceptions import print_exception
 
 from .agent import run_security_scan
 
@@ -38,7 +39,7 @@ def scan(
         )
 
     except Exception as e:
-        console.print(Panel(str(e), title="Ошибка", border_style="red"))
+        print_exception(e)
 
 
 if __name__ == "__main__":
