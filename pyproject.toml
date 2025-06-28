@@ -16,8 +16,8 @@ dependencies = [
     "langchain>=0.3.25,<0.4",
     "langchain-openai>=0.3.17,<0.4",
     "langchain-mcp-adapters>=0.1.7,<0.2",
-    "mcp-agent>=0.1.4",
     "mcp>=1.9.4",
+    "temporalio>=1.13.0",
 ]
 
 [dependency-groups]

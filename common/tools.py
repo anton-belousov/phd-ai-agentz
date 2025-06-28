@@ -17,7 +17,7 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
     """
     Выполняет команду и возвращает результат.
     """
-    console.print(f"[bold blue]\tВыполнение команды: {command}...[/bold blue]")
+    console.print(f"[bold yellow]\tВыполнение команды: {command}...[/bold yellow]")
 
     process: subprocess.Process = await create_subprocess_shell(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -51,7 +51,7 @@ async def nslookup(domain: str) -> str:
     """
     Выполняет nslookup и возвращает результат.
     """
-    console.print(f"[bold blue]\tПоиск {domain} с помощью nslookup...[/bold blue]")
+    console.print(f"[bold yellow]\tПоиск {domain} с помощью nslookup...[/bold yellow]")
 
     try:
         return await _run_command(" ".join(["nslookup", domain]))
@@ -64,7 +64,7 @@ async def ping(ip_address: str) -> str:
     """
     Выполняет ping и возвращает результат.
     """
-    console.print(f"[bold blue]\tПинг {ip_address}...[/bold blue]")
+    console.print(f"[bold yellow]\tПинг {ip_address}...[/bold yellow]")
 
     try:
         return await _run_command(" ".join(["ping", "-c", "4", ip_address]))
@@ -77,7 +77,7 @@ async def traceroute(ip_address: str) -> str:
     """
     Выполняет traceroute и возвращает результат.
     """
-    console.print(f"[bold blue]\tТрассировка {ip_address}...[/bold blue]")
+    console.print(f"[bold yellow]\tТрассировка {ip_address}...[/bold yellow]")
 
     try:
         return await _run_command(
@@ -94,7 +94,7 @@ async def nmap_scan(ip_address: str) -> str:
     Выполняет nmap-сканирование и возвращает результат.
     """
     console.print(
-        f"[bold blue]\tСканирование {ip_address} с помощью nmap...[/bold blue]"
+        f"[bold yellow]\tСканирование {ip_address} с помощью nmap...[/bold yellow]"
     )
 
     try:
@@ -110,7 +110,9 @@ async def shodan_lookup(ip_address: str) -> str:
     """
     Ищет информацию о IP-адресе с помощью Shodan API.
     """
-    console.print(f"[bold blue]\tПоиск {ip_address} с помощью Shodan...[/bold blue]")
+    console.print(
+        f"[bold yellow]\tПоиск {ip_address} с помощью Shodan...[/bold yellow]"
+    )
 
     shodan_client = shodan.Shodan(SHODAN_API_KEY) if SHODAN_API_KEY else None
 

@@ -10,7 +10,7 @@ from agent_langgraph.models import AgentInputState, AgentOutputState, AnalysisRe
 
 # сервер надо предварительно запустить
 MCP_SERVERS = {
-    "security": {
+    "security_tools": {
         "url": "http://localhost:8000/mcp",
         "transport": "streamable_http",
     }

@@ -1,6 +1,6 @@
 # Сканер безопасности на основе LangGraph и инструментов MCP
 
-По сути, является аналогом [agent_langgraph](../agent_langgraph/), только инструменты работают через MCP по HTTP.
+Является копией [agent_langgraph](../agent_langgraph/) (и вообще переиспользует его код), только инструменты работают через MCP по HTTP.
 Для инструментов написан враппер в `server.py`.
 
 Этот вариант гораздо более расширяемый, так как вы можете подключить любые инструменты через универсальный протокол MCP.
@@ -18,7 +18,9 @@ python -m agent_langgraph_mcp.server
 python -m agent_langgraph_mcp.main <цель>
 ```
 
-## Добавление новых инструментов
+## Примечания
+
+### Добавление новых инструментов
 
 Добавьте конфиги дополнительных MCP серверов в `agent_langgraph_mcp/agent.py`, константа `MCP_SERVERS`. 
 
@@ -41,3 +43,10 @@ MCP_SERVERS = {
     },
 }
 ```
+
+### Другие фичи MCP
+
+MCP поддерживает ещё кучу всего интересного, не отражённого в примере - например:
+
+* [ресурсы](https://github.com/modelcontextprotocol/python-sdk?tab=readme-ov-file#resources)
+* [запрос дополнительной инфы](https://github.com/modelcontextprotocol/python-sdk?tab=readme-ov-file#elicitation) из инструментов
