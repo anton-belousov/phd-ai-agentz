@@ -23,6 +23,7 @@ from common.langchain_tools import (
     shodan_lookup_tool,
     traceroute_tool,
 )
+from common.langfuse import get_callback_handler
 from common.prompts import get_prompt_template
 
 from .models import AgentInputState, AgentOutputState, AgentState, AnalysisResult
@@ -47,7 +48,7 @@ def create_security_agent(tools: list[BaseTool]):
         """
         Вызов агента
         """
-        console.print("[bold blue]Вызов агента...[/bold blue]")
+        console.print("[blue]\tВызов агента[/blue]")
         host = state["host"]
 
         messages: list[AnyMessage] = state["messages"]
@@ -74,7 +75,7 @@ def create_security_agent(tools: list[BaseTool]):
         """
         Проверяет, нужно ли продолжать выполнение инструментов
         """
-        console.print("[bold blue]Проверка продолжения...[/bold blue]")
+        console.print("[blue]\tПроверка необходимости продолжения[/blue]")
 
         messages: list[AnyMessage] = state["messages"]
         last_message: AnyMessage = messages[-1]
@@ -88,20 +89,20 @@ def create_security_agent(tools: list[BaseTool]):
         """
         Вызов инструмента
         """
-        console.print("[bold blue]Вызов инструмента...[/bold blue]")
+        console.print("[blue]\tВызов инструмента[/blue]")
 
         messages: list[AnyMessage] = state["messages"]
         last_message: AIMessage = messages[-1]
         new_messages: list[AnyMessage] = []
 
         for tool_call in last_message.tool_calls:
-            console.print(
-                f"[bold blue]\tВызов инструмента: {tool_call['name']}...[/bold blue]"
-            )
+            console.print(f"[blue]\t\tВызов инструмента: {tool_call['name']}[/blue]")
             tool: BaseTool | None = tool_name_to_tool.get(tool_call["name"])
 
             if not tool:
-                console.print(f"[red]\tИнструмент не найден: {tool_call['name']}[/red]")
+                console.print(
+                    f"[red]\t\tИнструмент не найден: {tool_call['name']}[/red]"
+                )
                 continue
 
             tool_message: ToolMessage = await tool.ainvoke(tool_call)
@@ -113,7 +114,7 @@ def create_security_agent(tools: list[BaseTool]):
         """
         Анализирует результаты всех инструментов и предоставляет результат.
         """
-        console.print("[bold blue]Анализ результатов...[/bold blue]")
+        console.print("[blue]\tАнализ результатов[/blue]")
 
         messages = state["messages"] + get_prompt_template(
             ANALYSIS_PROMPT
@@ -139,13 +140,15 @@ def create_security_agent(tools: list[BaseTool]):
     graph.add_edge("call_tool", "agent")
     graph.add_edge("analyze_results", END)
 
-    return graph.compile()
+    return graph.compile().with_config({"run_name": "agent_langgraph"})
 
 
 async def run_security_scan(host: str) -> AnalysisResult:
     """
     Выполняет сканирование хоста
     """
+    console.print("[bold blue]Запуск агента[/bold blue]")
+
     agent = create_security_agent(
         [
             ping_tool,
@@ -156,6 +159,11 @@ async def run_security_scan(host: str) -> AnalysisResult:
         ]
     )
     input_state = AgentInputState(host=host)
-    output_state: AgentOutputState = await agent.ainvoke(input_state)
+    output_state: AgentOutputState = await agent.ainvoke(
+        input_state,
+        config={
+            "callbacks": [get_callback_handler()],
+        },
+    )
 
     return output_state["result"]

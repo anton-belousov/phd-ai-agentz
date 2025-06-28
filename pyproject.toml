@@ -18,6 +18,7 @@ dependencies = [
     "langchain-mcp-adapters>=0.1.7,<0.2",
     "mcp>=1.9.4",
     "temporalio>=1.13.0",
+    "langfuse>=3.0.7",
 ]
 
 [dependency-groups]

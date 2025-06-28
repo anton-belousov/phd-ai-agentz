@@ -17,7 +17,7 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
     """
     Выполняет команду и возвращает результат.
     """
-    console.print(f"[bold yellow]\tВыполнение команды: {command}...[/bold yellow]")
+    console.print(f"[magenta]\t\tВыполнение команды: {command}[/magenta]")
 
     process: subprocess.Process = await create_subprocess_shell(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -39,7 +39,7 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
 
     except TimeoutError:
         console.print(
-            f"[bold red]\t{command} завершилась по таймауту {timeout} секунд[/bold red]"
+            f"[red]\t\t{command} завершилась по таймауту {timeout} секунд[/bold]"
         )
         process.terminate()
         await process.wait()
@@ -51,7 +51,7 @@ async def nslookup(domain: str) -> str:
     """
     Выполняет nslookup и возвращает результат.
     """
-    console.print(f"[bold yellow]\tПоиск {domain} с помощью nslookup...[/bold yellow]")
+    console.print(f"[magenta]\t\tПоиск {domain} с помощью nslookup[/magenta]")
 
     try:
         return await _run_command(" ".join(["nslookup", domain]))
@@ -64,7 +64,7 @@ async def ping(ip_address: str) -> str:
     """
     Выполняет ping и возвращает результат.
     """
-    console.print(f"[bold yellow]\tПинг {ip_address}...[/bold yellow]")
+    console.print(f"[magenta]\t\tПинг {ip_address}[/magenta]")
 
     try:
         return await _run_command(" ".join(["ping", "-c", "4", ip_address]))
@@ -77,12 +77,12 @@ async def traceroute(ip_address: str) -> str:
     """
     Выполняет traceroute и возвращает результат.
     """
-    console.print(f"[bold yellow]\tТрассировка {ip_address}...[/bold yellow]")
+    console.print(f"[magenta]\t\tТрассировка {ip_address}[/magenta]")
 
     try:
         return await _run_command(
             " ".join(["traceroute", "-w", "1", "-q", "1", "-m", "20", ip_address]),
-            timeout=120,
+            timeout=60,
         )
 
     except Exception as e:
@@ -93,13 +93,11 @@ async def nmap_scan(ip_address: str) -> str:
     """
     Выполняет nmap-сканирование и возвращает результат.
     """
-    console.print(
-        f"[bold yellow]\tСканирование {ip_address} с помощью nmap...[/bold yellow]"
-    )
+    console.print(f"[magenta]\t\tСканирование {ip_address} с помощью nmap[/magenta]")
 
     try:
         return await _run_command(
-            " ".join(["nmap", "-sV", "-v", "-A", "-T4", "-Pn", ip_address]), timeout=120
+            " ".join(["nmap", "-sV", "-v", "-A", "-T4", "-Pn", ip_address]), timeout=60
         )
 
     except Exception as e:
@@ -110,9 +108,7 @@ async def shodan_lookup(ip_address: str) -> str:
     """
     Ищет информацию о IP-адресе с помощью Shodan API.
     """
-    console.print(
-        f"[bold yellow]\tПоиск {ip_address} с помощью Shodan...[/bold yellow]"
-    )
+    console.print(f"[magenta]\t\tПоиск {ip_address} с помощью Shodan[/magenta]")
 
     shodan_client = shodan.Shodan(SHODAN_API_KEY) if SHODAN_API_KEY else None
 

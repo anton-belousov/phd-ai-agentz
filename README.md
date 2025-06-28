@@ -4,6 +4,7 @@
 
 ## Зависимости
 
+- Linux или Mac OS, на Windows скорее всего работать не будет
 - Python 3.12 или выше
 - uv для управления зависимостями
 - Необходимые системные инструменты:
@@ -11,7 +12,7 @@
   - traceroute
   - nmap
   - nslookup
-- API ключ [Shodan](https://shodan.io) (напишите мне в @antonbelousoff - могу поделиться своим)
+- API ключ [Shodan](https://shodan.io) (напишите мне - могу поделиться своим)
 
 ## Структура проекта
 
@@ -62,3 +63,7 @@ uv sync --active
 ## Лицензия
 
 MIT
+
+## Контакты
+
+Telegram: @antonbelousoff
