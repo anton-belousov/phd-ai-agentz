@@ -26,7 +26,7 @@ def scan(
     console.print("[bold green]Запуск сканирования...[/bold green]")
 
     try:
-        console.print(f"[bold blue]\tЗапуск сканирования для {host}...[/bold blue]")
+        console.print(f"[green]\tЗапуск сканирования для {host}...[/green]")
         result: AnalysisResult = asyncio.run(run_security_scan(host))
 
         console.print(
@@ -38,8 +38,7 @@ def scan(
         )
 
     except Exception as e:
-        console.print(f"[red]\tОшибка: {str(e)}[/red]")
-        raise
+        console.print(Panel(str(e), title="Ошибка", border_style="red"))
 
 
 if __name__ == "__main__":

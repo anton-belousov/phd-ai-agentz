@@ -14,3 +14,4 @@ OPENAI_API_MODEL = os.getenv("OPENAI_API_MODEL")
 OPENAI_API_URL = os.getenv("OPENAI_API_URL")
 
 DEBUG_SWARM = os.getenv("DEBUG_SWARM", "false").lower() == "true"
+PRINT_TOOL_RESULTS = os.getenv("PRINT_TOOL_RESULTS", "false").lower() == "true"

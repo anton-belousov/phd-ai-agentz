@@ -7,8 +7,9 @@ from json import dumps
 
 import shodan
 from rich.console import Console
+from rich.panel import Panel
 
-from common.config import SHODAN_API_KEY
+from common.config import PRINT_TOOL_RESULTS, SHODAN_API_KEY
 
 console = Console()
 
@@ -23,6 +24,8 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
 
+    result: str | None = None
+
     try:
         stdout, stderr = await wait_for(process.communicate(), timeout=timeout)
         return_code = process.returncode
@@ -33,18 +36,23 @@ async def _run_command(command: str, timeout: int = 30) -> subprocess.Process:
             if not error_result:
                 error_result = "Error running command"
 
-            return error_result
-
-        return stdout.decode()
+            result = error_result
+        else:
+            result = stdout.decode()
 
     except TimeoutError:
         console.print(
-            f"[red]\t\t{command} завершилась по таймауту {timeout} секунд[/bold]"
+            f"[red]\t\t{command} завершилась по таймауту {timeout} секунд[/red]"
         )
         process.terminate()
         await process.wait()
 
         raise RuntimeError("Command has timed out")
+
+    if PRINT_TOOL_RESULTS:
+        console.print(Panel(result, title="Результат", border_style="magenta"))
+
+    return result
 
 
 async def nslookup(domain: str) -> str:
