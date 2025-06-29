@@ -19,6 +19,8 @@
 python -m agent_langgraph_swarm.main <цель>
 ```
 
+![langgraph.gif](../images/langgraph_swarm.gif)
+
 ## Примечания
 
 Библиотека `langgraph_swarm` ещё очень сыра - чтобы получить структурированный ответ приходится терпеть боль.

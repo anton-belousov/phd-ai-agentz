@@ -18,6 +18,8 @@ python -m agent_langgraph_mcp.server
 python -m agent_langgraph_mcp.main <цель>
 ```
 
+![langgraph.gif](../images/langgraph_mcp.gif)
+
 ## Примечания
 
 ### Добавление новых инструментов

@@ -22,6 +22,8 @@ python -m agent_mcp_swarm.agent_server
 python -m agent_mcp_swarm.main <цель>
 ```
 
+![langgraph.gif](../images/mcp_swarm.gif)
+
 ## Примечания
 
 * Возможно, вместо этого варианта стоит попробовать [A2A](https://github.com/a2aproject/A2A) - его ещё не смотрел. На первый взгляд выглядит так, что для межагентского взаимодействия оно подходит лучше MCP.
