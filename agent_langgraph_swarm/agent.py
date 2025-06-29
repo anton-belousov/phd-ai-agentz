@@ -22,6 +22,7 @@ from common.langchain_tools import (
     shodan_lookup_tool,
     traceroute_tool,
 )
+from common.langfuse import get_callback_handler
 from common.prompts import get_prompt_template
 
 from .models import AnalysisResult, CustomSwarmState
@@ -130,7 +131,9 @@ def create_security_swarm():
         state_schema=CustomSwarmState,
     )
 
-    app = swarm.compile(checkpointer=checkpointer, store=store)
+    app = swarm.compile(checkpointer=checkpointer, store=store).with_config(
+        {"run_name": "agent_langgraph_swarm"}
+    )
 
     return app
 
@@ -143,7 +146,7 @@ async def run_security_scan(host: str) -> AnalysisResult:
 
     swarm = create_security_swarm()
     template = get_prompt_template(REQUEST_PROCESSING_PROMPT)
-    config = {"configurable": {"thread_id": "1"}}
+    config = {"configurable": {"thread_id": "1"}, "callbacks": [get_callback_handler()]}
 
     # CustomSwarmState - это состояние роя, которое мы используем для хранения результатов
     # Нам нужен structured_response из analysis_agent, который содержит результаты сканирования
